@@ -97,8 +97,8 @@ module movement_names::domains {
         transfer_ref: TransferRef,
         registration_time_sec: u64,
         key: Key<T>,
-        keyBalances: mapping<address, u64>,
-        keySupply: u64,
+        key_balances: mapping<address, u64>,
+        key_supply: u64,
         // Currently unused, but may be used in the future to extend with more metadata
         extend_ref: ExtendRef,
     }
