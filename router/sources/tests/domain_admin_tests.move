@@ -11,8 +11,8 @@ module router::domain_admin_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -20,15 +20,15 @@ module router::domain_admin_tests {
     )]
     fun test_domain_admin_transfer_subdomain(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let user2 = vector::borrow(&users, 1);
         let user1_addr = address_of(user1);
@@ -59,8 +59,8 @@ module router::domain_admin_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -68,15 +68,15 @@ module router::domain_admin_tests {
     )]
     fun test_domain_admin_set_subdomain_expiration_policy(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
 
         // Bump mode
@@ -119,8 +119,8 @@ module router::domain_admin_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -128,15 +128,15 @@ module router::domain_admin_tests {
     )]
     fun test_domain_admin_set_subdomain_expiration(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
 
         // Bump mode

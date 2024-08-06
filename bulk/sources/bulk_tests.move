@@ -14,8 +14,8 @@ module bulk::bulk_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -23,15 +23,15 @@ module bulk::bulk_tests {
     )]
     fun test_bulk_migrate_happy_path(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let user1_addr = signer::address_of(user1);
         let domain_name1 = utf8(b"test1");
@@ -86,48 +86,48 @@ module bulk::bulk_tests {
 
         // Verify names no longer exist in v1
         {
-            let (is_owner, _) = aptos_names::domains::is_owner_of_name(user1_addr, option::none(), domain_name1);
+            let (is_owner, _) = movement_names::domains::is_owner_of_name(user1_addr, option::none(), domain_name1);
             assert!(!is_owner, 1);
-            let (is_owner, _) = aptos_names::domains::is_owner_of_name(user1_addr, subdomain_name_opt, domain_name1);
+            let (is_owner, _) = movement_names::domains::is_owner_of_name(user1_addr, subdomain_name_opt, domain_name1);
             assert!(!is_owner, 2);
-            let (is_owner, _) = aptos_names::domains::is_owner_of_name(user1_addr, option::none(), domain_name2);
+            let (is_owner, _) = movement_names::domains::is_owner_of_name(user1_addr, option::none(), domain_name2);
             assert!(!is_owner, 2);
-            let (is_owner, _) = aptos_names::domains::is_owner_of_name(user1_addr, subdomain_name_opt, domain_name2);
+            let (is_owner, _) = movement_names::domains::is_owner_of_name(user1_addr, subdomain_name_opt, domain_name2);
             assert!(!is_owner, 2);
         };
 
         // Verify names exist in v2 now
         {
             assert!(
-                aptos_names_v2_1::v2_1_domains::is_token_owner(
+                movement_names::domains::is_token_owner(
                     user1_addr,
                     domain_name1,
                     option::none()
-                ) && !aptos_names_v2_1::v2_1_domains::is_name_expired(domain_name1, option::none()),
+                ) && !movement_names::domains::is_name_expired(domain_name1, option::none()),
                 3
             );
             assert!(
-                aptos_names_v2_1::v2_1_domains::is_token_owner(
+                movement_names::domains::is_token_owner(
                     user1_addr,
                     domain_name1,
                     subdomain_name_opt,
-                ) && !aptos_names_v2_1::v2_1_domains::is_name_expired(domain_name1, subdomain_name_opt),
+                ) && !movement_names::domains::is_name_expired(domain_name1, subdomain_name_opt),
                 4
             );
             assert!(
-                aptos_names_v2_1::v2_1_domains::is_token_owner(
+                movement_names::domains::is_token_owner(
                     user1_addr,
                     domain_name2,
                     option::none()
-                ) && !aptos_names_v2_1::v2_1_domains::is_name_expired(domain_name2, option::none()),
+                ) && !movement_names::domains::is_name_expired(domain_name2, option::none()),
                 3
             );
             assert!(
-                aptos_names_v2_1::v2_1_domains::is_token_owner(
+                movement_names::domains::is_token_owner(
                     user1_addr,
                     domain_name2,
                     subdomain_name_opt,
-                ) && !aptos_names_v2_1::v2_1_domains::is_name_expired(domain_name2, subdomain_name_opt),
+                ) && !movement_names::domains::is_name_expired(domain_name2, subdomain_name_opt),
                 4
             );
         }
@@ -135,8 +135,8 @@ module bulk::bulk_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -144,15 +144,15 @@ module bulk::bulk_tests {
     )]
     fun test_bulk_renew_happy_path(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
 

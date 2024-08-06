@@ -10,8 +10,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -19,15 +19,15 @@ module router::router_tests {
     )]
     fun test_initialization(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
         assert!(router::get_admin_addr() == @router, 0);
         assert!(option::is_none(&router::get_pending_admin_addr()), 1);
         assert!(router::get_mode() == 0, 2)
@@ -35,8 +35,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -44,15 +44,15 @@ module router::router_tests {
     )]
     fun test_accept_admin(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
 
@@ -67,8 +67,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -77,15 +77,15 @@ module router::router_tests {
     #[expected_failure(abort_code = 327682, location = router)]
     fun test_accept_admin_only_pending_admin(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
 
@@ -98,8 +98,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -108,15 +108,15 @@ module router::router_tests {
     #[expected_failure(abort_code = 327680, location = router)]
     fun test_set_pending_admin_only_admin(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
         let user = vector::borrow(&users, 0);
 
         router::set_pending_admin(user, address_of(user));
@@ -124,8 +124,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -133,15 +133,15 @@ module router::router_tests {
     )]
     fun test_set_mode(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
 
         let i = 0;
         while (i <= MAX_MODE) {
@@ -153,8 +153,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -163,15 +163,15 @@ module router::router_tests {
     #[expected_failure(abort_code = 327680, location = router)]
     fun test_set_mode_admin_only(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
         let user = vector::borrow(&users, 0);
 
         router::set_mode(user, 0);
@@ -179,8 +179,8 @@ module router::router_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user = @0x077,
         aptos = @0x1,
         rando = @0x266f,
@@ -189,15 +189,15 @@ module router::router_tests {
     #[expected_failure(abort_code = 65539, location = router)]
     fun test_set_mode_invalid_mode(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: signer,
         rando: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user, &aptos, rando, &foundation);
+        router_test_helper::e2e_test_setup(movement_names, movement_names, user, &aptos, rando, &foundation);
 
         router::set_mode(router, MAX_MODE + 1);
     }

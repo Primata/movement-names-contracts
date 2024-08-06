@@ -2,11 +2,8 @@
 name = 'router'
 version = '1.0.0'
 
-[dependencies.aptos_names]
+[dependencies.movement_names]
 local = "../core"
-
-[dependencies.aptos_names_v2_1]
-local = "../core_v2"
 
 [dependencies.AptosFramework]
 git = 'https://github.com/aptos-labs/aptos-core.git'

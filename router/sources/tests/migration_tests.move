@@ -13,8 +13,8 @@ module router::migration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -22,15 +22,15 @@ module router::migration_tests {
     )]
     fun test_migrate_domain(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
         let domain_name = utf8(b"test");
@@ -61,7 +61,7 @@ module router::migration_tests {
         };
 
         // Make v1 read only except for admin
-        aptos_names::config::set_is_enabled(aptos_names, false);
+        movement_names::config::set_is_enabled(movement_names, false);
 
         // Migrate to v2
         router::migrate_name(user, domain_name, option::none());
@@ -76,17 +76,17 @@ module router::migration_tests {
         };
 
         // v1 target is cleared
-        assert!(option::is_none(&aptos_names::domains::name_resolved_address(option::none(), domain_name)), 17);
+        assert!(option::is_none(&movement_names::domains::name_resolved_address(option::none(), domain_name)), 17);
         // v1 primary name is cleared
-        assert!(option::is_none(&aptos_names::domains::get_reverse_lookup(user_addr)), 17);
+        assert!(option::is_none(&movement_names::domains::get_reverse_lookup(user_addr)), 17);
         // v1 registration is cleared
-        assert!(!aptos_names::domains::name_is_registered(option::none(), domain_name), 18);
+        assert!(!movement_names::domains::name_is_registered(option::none(), domain_name), 18);
     }
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -95,15 +95,15 @@ module router::migration_tests {
     #[expected_failure(abort_code = 327688, location = router)]
     fun test_migrate_domain_as_non_owner(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let user2 = vector::borrow(&users, 1);
         let domain_name = utf8(b"test");
@@ -120,8 +120,8 @@ module router::migration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -129,15 +129,15 @@ module router::migration_tests {
     )]
     fun test_migrate_domain_no_autorenewal(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
 
@@ -152,7 +152,7 @@ module router::migration_tests {
         router::set_mode(router, 1);
 
         // Make v1 read only except for admin
-        aptos_names::config::set_is_enabled(aptos_names, false);
+        movement_names::config::set_is_enabled(movement_names, false);
 
         router::migrate_name(user, domain_name, option::none());
 
@@ -160,17 +160,17 @@ module router::migration_tests {
         assert!(router::get_expiration(domain_name, option::none()) == now + SECONDS_PER_YEAR, 14);
 
         // v1 target is cleared
-        assert!(option::is_none(&aptos_names::domains::name_resolved_address(option::none(), domain_name)), 17);
+        assert!(option::is_none(&movement_names::domains::name_resolved_address(option::none(), domain_name)), 17);
         // v1 primary name is cleared
-        assert!(option::is_none(&aptos_names::domains::get_reverse_lookup(address_of(user))), 17);
+        assert!(option::is_none(&movement_names::domains::get_reverse_lookup(address_of(user))), 17);
         // v1 registration is cleared
-        assert!(!aptos_names::domains::name_is_registered(option::none(), domain_name), 18);
+        assert!(!movement_names::domains::name_is_registered(option::none(), domain_name), 18);
     }
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -178,15 +178,15 @@ module router::migration_tests {
     )]
     fun test_migrate_subdomain(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
         let domain_name = utf8(b"test");
@@ -220,7 +220,7 @@ module router::migration_tests {
         router::set_mode(router, 1);
 
         // Make v1 read only except for admin
-        aptos_names::config::set_is_enabled(aptos_names, false);
+        movement_names::config::set_is_enabled(movement_names, false);
 
         // Attribtes should be the same
         assert!(router::is_name_owner(user_addr, domain_name, subdomain_name_opt), 7);
@@ -250,19 +250,19 @@ module router::migration_tests {
         };
 
         // v1 target is cleared
-        assert!(option::is_none(&aptos_names::domains::name_resolved_address(option::none(), domain_name)), 12);
-        assert!(option::is_none(&aptos_names::domains::name_resolved_address(subdomain_name_opt, domain_name)), 13);
+        assert!(option::is_none(&movement_names::domains::name_resolved_address(option::none(), domain_name)), 12);
+        assert!(option::is_none(&movement_names::domains::name_resolved_address(subdomain_name_opt, domain_name)), 13);
         // v1 primary name is cleared
-        assert!(option::is_none(&aptos_names::domains::get_reverse_lookup(address_of(user))), 14);
+        assert!(option::is_none(&movement_names::domains::get_reverse_lookup(address_of(user))), 14);
         // v1 registration is cleared
-        assert!(!aptos_names::domains::name_is_registered(option::none(), domain_name), 15);
-        assert!(!aptos_names::domains::name_is_registered(subdomain_name_opt, domain_name), 16);
+        assert!(!movement_names::domains::name_is_registered(option::none(), domain_name), 15);
+        assert!(!movement_names::domains::name_is_registered(subdomain_name_opt, domain_name), 16);
     }
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -271,15 +271,15 @@ module router::migration_tests {
     #[expected_failure(abort_code = 327688, location = router)]
     fun test_cannot_migrate_subdomain_as_non_owner(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let user2 = vector::borrow(&users, 1);
         let domain_name = utf8(b"test");
@@ -311,8 +311,8 @@ module router::migration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -321,15 +321,15 @@ module router::migration_tests {
     #[expected_failure(abort_code = 196618, location = router)]
     fun test_cannot_migrate_subdomain_before_domain(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
         let subdomain_name = utf8(b"sub");
@@ -357,8 +357,8 @@ module router::migration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -367,15 +367,15 @@ module router::migration_tests {
     #[expected_failure(abort_code = 196619, location = router)]
     fun test_cannot_migrate_twice(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
 
@@ -392,8 +392,8 @@ module router::migration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -401,15 +401,15 @@ module router::migration_tests {
     )]
     fun test_migrate_expired_but_still_in_grace_period_name(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
 
@@ -420,7 +420,7 @@ module router::migration_tests {
         router::set_mode(router, 1);
 
         // Make v1 read only except for admin
-        aptos_names::config::set_is_enabled(aptos_names, false);
+        movement_names::config::set_is_enabled(movement_names, false);
 
         // Migration only allowed [expiration - 6 month, expiration + grace period]. Move time to 100 seconds after expiry.
         // We should be able to migrate since it's within the 1 month grace period
@@ -430,17 +430,17 @@ module router::migration_tests {
         assert!(router::get_expiration(domain_name, option::none()) == SECONDS_PER_YEAR * 2, 2);
 
         // v1 target is cleared
-        assert!(option::is_none(&aptos_names::domains::name_resolved_address(option::none(), domain_name)), 12);
+        assert!(option::is_none(&movement_names::domains::name_resolved_address(option::none(), domain_name)), 12);
         // v1 primary name is cleared
-        assert!(option::is_none(&aptos_names::domains::get_reverse_lookup(address_of(user))), 14);
+        assert!(option::is_none(&movement_names::domains::get_reverse_lookup(address_of(user))), 14);
         // v1 registration is cleared
-        assert!(!aptos_names::domains::name_is_registered(option::none(), domain_name), 15);
+        assert!(!movement_names::domains::name_is_registered(option::none(), domain_name), 15);
     }
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -449,15 +449,15 @@ module router::migration_tests {
     #[expected_failure(abort_code = 196615, location = router)]
     fun test_cannot_migrate_expired_past_grace_period_name(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
 

@@ -1,6 +1,6 @@
 [package]
-name = 'aptos_names_transfer'
+name = 'movement_names_transfer'
 version = '1.0.0'
 
-[dependencies.aptos_names]
+[dependencies.movement_names]
 local = "../core"

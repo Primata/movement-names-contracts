@@ -17,27 +17,27 @@ module router::router_test_helper {
         MINT_AMOUNT_APT * OCTAS
     }
 
-    /// Sets up test by initializing ANS v2
+    /// Sets up test by initializing MNS v2
     public fun e2e_test_setup(
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user: signer,
         aptos: &signer,
         rando: signer,
         foundation: &signer
     ): vector<signer> {
-        account::create_account_for_test(@aptos_names);
-        if (aptos_names_v2_1 != aptos_names) {
-            account::create_account_for_test(@aptos_names_v2_1);
+        account::create_account_for_test(@movement_names);
+        if (movement_names != movement_names) {
+            account::create_account_for_test(@movement_names);
         };
         let new_accounts = setup_and_fund_accounts(aptos, foundation, vector[user, rando]);
         timestamp::set_time_has_started_for_testing(aptos);
-        aptos_names::domains::init_module_for_test(aptos_names);
-        aptos_names_v2_1::v2_1_domains::init_module_for_test(aptos_names_v2_1);
-        aptos_names::config::set_fund_destination_address_test_only(signer::address_of(foundation));
-        aptos_names_v2_1::config::set_reregistration_grace_sec(aptos_names, ONE_MONTH_IN_SECONDS);
-        aptos_names_v2_1::v2_1_config::set_fund_destination_address_test_only(signer::address_of(foundation));
-        aptos_names_v2_1::v2_1_config::set_reregistration_grace_sec(aptos_names_v2_1, ONE_MONTH_IN_SECONDS);
+        movement_names::domains::init_module_for_test(movement_names);
+        movement_names::domains::init_module_for_test(movement_names);
+        movement_names::config::set_fund_destination_address_test_only(signer::address_of(foundation));
+        movement_names::config::set_reregistration_grace_sec(movement_names, ONE_MONTH_IN_SECONDS);
+        movement_names::config::set_fund_destination_address_test_only(signer::address_of(foundation));
+        movement_names::config::set_reregistration_grace_sec(movement_names, ONE_MONTH_IN_SECONDS);
         new_accounts
     }
 

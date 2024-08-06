@@ -1,5 +1,5 @@
 script {
-    use aptos_names::token_helper;
+    use movement_names::token_helper;
 
     fun main(admin: &signer) {
         let names = vector [
@@ -13,7 +13,7 @@ script {
 
         while (!std::vector::is_empty(&names)) {
             let name = std::string::utf8(std::vector::pop_back(&mut names));
-            aptos_names::domains::force_create_or_seize_domain_name(admin, name, one_year_secs);
+            movement_names::domains::force_create_or_seize_domain_name(admin, name, one_year_secs);
 
             if (!transfer) {
                 continue

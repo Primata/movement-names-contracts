@@ -13,7 +13,7 @@ script {
 
         while (!std::vector::is_empty(&names)) {
             let name = std::string::utf8(std::vector::pop_back(&mut names));
-            aptos_names_v2_1::v2_1_domains::force_set_name_expiration(
+            movement_names::domains::force_set_name_expiration(
                 admin,
                 name,
                 option::none(),

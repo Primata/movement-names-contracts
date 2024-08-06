@@ -1,8 +1,8 @@
 [package]
-name = 'aptos_names_distribute'
+name = 'movement_names_distribute'
 version = '1.0.0'
 
-[dependencies.aptos_names]
+[dependencies.movement_names]
 local = "../core"
 
 [dependencies.AptosToken]

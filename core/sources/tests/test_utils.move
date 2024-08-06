@@ -1,5 +1,4 @@
-#[test_only]
-module aptos_names::test_utils {
+module movement_names::test_utils {
 
     use std::string::{Self, String};
     use aptos_std::debug;

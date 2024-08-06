@@ -35,7 +35,7 @@ script {
 
         while (!std::vector::is_empty(&names)) {
             let name = std::string::utf8(std::vector::pop_back(&mut names));
-            aptos_names::domains::force_clear_registration(admin, option::none<string::String>(), name);
+            movement_names::domains::force_clear_registration(admin, option::none<string::String>(), name);
         }
     }
 }

@@ -1,5 +1,5 @@
 script {
-    use aptos_names::token_helper;
+    use movement_names::token_helper;
 
     fun main(offerer: &signer) {
         let names = vector [

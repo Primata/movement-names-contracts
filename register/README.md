@@ -7,4 +7,4 @@ Preparation:
 Each iteration:
 1. Update the script with the appropriate names to seize / register
 2. Compile the script: `aptos move compile`
-3. Run the script: `aptos move run-script --compiled-script-path register/build/aptos_names_register/bytecode_scripts/main.mv --profile admin`
+3. Run the script: `aptos move run-script --compiled-script-path register/build/movement_names_register/bytecode_scripts/main.mv --profile admin`

@@ -1,9 +1,9 @@
 [package]
-name = 'aptos_names_bulk_force_renewal'
+name = 'movement_names_bulk_force_renewal'
 version = '1.0.0'
 
 [addresses]
 repository = "_"
 
-[dependencies.aptos_names_v2_1]
+[dependencies.movement_names]
 local = "../core_v2"

@@ -14,8 +14,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -23,15 +23,15 @@ module router::registration_tests {
     )]
     fun test_register_domain(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
         let domain_name1 = utf8(b"test1");
@@ -50,7 +50,7 @@ module router::registration_tests {
         assert!(router::is_name_owner(user_addr, domain_name2, option::none()), 3);
 
         // v1 primary name is not cleared. v1 primary name only gets unset for explicit change of primary name.
-        assert!(option::is_some(&aptos_names::domains::get_reverse_lookup(address_of(user))), 4);
+        assert!(option::is_some(&movement_names::domains::get_reverse_lookup(address_of(user))), 4);
         // v2 primary name is properly set
         let (primary_subdomain_name, primary_domain_name) = router::router::get_primary_name(address_of(user));
         assert!(option::is_none(&primary_subdomain_name), 5);
@@ -59,8 +59,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -69,15 +69,15 @@ module router::registration_tests {
     #[expected_failure(abort_code = 851974, location = router)]
     fun test_register_same_domain_in_v1_and_v2(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test1");
 
@@ -93,8 +93,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -102,15 +102,15 @@ module router::registration_tests {
     )]
     fun test_register_diff_domain_in_v1_and_v2(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
         let domain_name1 = utf8(b"test1");
@@ -125,7 +125,7 @@ module router::registration_tests {
         };
 
         // Bump mode and disable v1
-        aptos_names::config::set_is_enabled(aptos_names, false);
+        movement_names::config::set_is_enabled(movement_names, false);
         router::set_mode(router, 1);
 
         let domain_name = utf8(b"test2");
@@ -140,8 +140,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -149,15 +149,15 @@ module router::registration_tests {
     )]
     fun test_register_domain_with_target_addr_and_to_addr(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let user2 = vector::borrow(&users, 1);
         let user1_addr = address_of(user1);
@@ -208,8 +208,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -217,15 +217,15 @@ module router::registration_tests {
     )]
     fun test_register_subdomain(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let user_addr = address_of(user);
 
@@ -283,8 +283,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -293,15 +293,15 @@ module router::registration_tests {
     #[expected_failure(abort_code = 851974, location = router)]
     fun test_register_same_subdomain_in_v1_and_v2(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
         let subdomain_name = utf8(b"sub");
@@ -340,8 +340,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -350,15 +350,15 @@ module router::registration_tests {
     #[expected_failure(abort_code = 851974, location = router)]
     fun test_register_subdomain_whose_domain_is_not_in_v2(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user = vector::borrow(&users, 0);
         let domain_name = utf8(b"test");
         let subdomain_name = utf8(b"sub");
@@ -394,8 +394,8 @@ module router::registration_tests {
 
     #[test(
         router = @router,
-        aptos_names = @aptos_names,
-        aptos_names_v2_1 = @aptos_names_v2_1,
+        movement_names = @movement_names,
+        movement_names = @movement_names,
         user1 = @0x077,
         user2 = @0x266f,
         aptos = @0x1,
@@ -403,15 +403,15 @@ module router::registration_tests {
     )]
     fun test_register_subdomain_with_target_addr_and_to_addr(
         router: &signer,
-        aptos_names: &signer,
-        aptos_names_v2_1: &signer,
+        movement_names: &signer,
+        movement_names: &signer,
         user1: signer,
         user2: signer,
         aptos: signer,
         foundation: signer
     ) {
         router::init_module_for_test(router);
-        let users = router_test_helper::e2e_test_setup(aptos_names, aptos_names_v2_1, user1, &aptos, user2, &foundation);
+        let users = router_test_helper::e2e_test_setup(movement_names, movement_names, user1, &aptos, user2, &foundation);
         let user1 = vector::borrow(&users, 0);
         let user2 = vector::borrow(&users, 1);
         let user1_addr = address_of(user1);
