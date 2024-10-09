@@ -90,17 +90,22 @@ module movement_names::domains {
     }
 
     #[resource_group_member(group = movement_names::domains::ObjectGroup)]
-    struct NameRecord<phantom T> has key {
+    struct NameRecord has key {
         domain_name: String,
         expiration_time_sec: u64,
         target_address: Option<address>,
         transfer_ref: TransferRef,
         registration_time_sec: u64,
-        key: Key<T>,
         key_balances: mapping<address, u64>,
         key_supply: u64,
         // Currently unused, but may be used in the future to extend with more metadata
         extend_ref: ExtendRef,
+    }
+
+    struct ManagedFungibleAsset {
+        mint_ref: MintRef,
+        transfer_ref: TransferRef,
+        burn_ref: BurnRef,
     }
 
     #[resource_group_member(group = movement_names::domains::ObjectGroup)]
@@ -263,7 +268,7 @@ module movement_names::domains {
         );
         let token_signer = object::generate_signer(&constructor_ref);
         // Mint a key Funbile Asset
-        create_key(&to_addr, &domain_name);
+        let key_token = create_key(&to_addr, &domain_name);
         // creating subdomain
         let record = NameRecord {
             domain_name,
@@ -271,7 +276,9 @@ module movement_names::domains {
             target_address: option::none(),
             transfer_ref: object::generate_transfer_ref(&constructor_ref),
             registration_time_sec: timestamp::now_seconds(),
-            
+            key: key_token,
+            key_balances: 0,
+            key_supply: 0,
             extend_ref: object::generate_extend_ref(&constructor_ref),
         };
         move_to(&token_signer, record);
@@ -286,8 +293,16 @@ module movement_names::domains {
         object::transfer(&get_app_signer(), record_obj, to_addr);
     }
 
+     #[view]
+    /// Return the address of the managed fungible asset that's created when this module is deployed.
+    public fun get_metadata(domain: &String): Object<Metadata> {
+        let asset_address = object::create_object_address(&@domains, domain);
+        object::address_to_object<Metadata>(asset_address)
+    }
+
     fun create_key(to_addr: &address, domain_name: &String) {
-        let constructor_ref = &object::create_named_object(admin, ASSET_SYMBOL);
+        let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
+        let token_signer = object::generate_signer(&constructor_ref);
         primary_fungible_store::create_primary_store_enabled_fungible_asset(
             constructor_ref,
             option::none(),
@@ -302,6 +317,13 @@ module movement_names::domains {
         let burn_ref = fungible_asset::generate_burn_ref(constructor_ref);
         let transfer_ref = fungible_asset::generate_transfer_ref(constructor_ref);
         let metadata_object_keys_manager = object::generate_signer(&keys_manager);
+
+        let admin_primary_store = primary_fungible_store::ensure_primary_store_exists(
+            &token_signer,
+            get_metadata(domain_name)
+        );
+        
+        fungible_asset::mint_to(&mint_ref, admin_primary_store, 1);
         // Allow keys manager to mint, burn, and transfer keys
         move_to(
             &metadata_object_keys_manager,
