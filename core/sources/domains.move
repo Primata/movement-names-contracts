@@ -96,7 +96,6 @@ module movement_names::domains {
         target_address: Option<address>,
         transfer_ref: TransferRef,
         registration_time_sec: u64,
-        key_balances: mapping<address, u64>,
         key_supply: u64,
         // Currently unused, but may be used in the future to extend with more metadata
         extend_ref: ExtendRef,
@@ -268,7 +267,8 @@ module movement_names::domains {
         );
         let token_signer = object::generate_signer(&constructor_ref);
         // Mint a key Funbile Asset
-        let key_token = create_key(&to_addr, &domain_name);
+        create_key(&to_addr, &domain_name);
+
         // creating subdomain
         let record = NameRecord {
             domain_name,
@@ -276,8 +276,6 @@ module movement_names::domains {
             target_address: option::none(),
             transfer_ref: object::generate_transfer_ref(&constructor_ref),
             registration_time_sec: timestamp::now_seconds(),
-            key: key_token,
-            key_balances: 0,
             key_supply: 0,
             extend_ref: object::generate_extend_ref(&constructor_ref),
         };
@@ -323,7 +321,7 @@ module movement_names::domains {
             get_metadata(domain_name)
         );
         
-        fungible_asset::mint_to(&mint_ref, admin_primary_store, 1);
+        fungible_asset::mint_to(&mint_ref, to_addr, 1);
         // Allow keys manager to mint, burn, and transfer keys
         move_to(
             &metadata_object_keys_manager,

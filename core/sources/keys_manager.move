@@ -9,6 +9,7 @@ module movement_names::keys_manager {
     use movement_names::token_helper;
     use movement_names::string_validator;
     use movement_names::domains::{NameRecord};
+    use movement_names::domains;
     use std::error;
     use std::option::{Self, Option};
     use std::signer::address_of;
@@ -36,6 +37,10 @@ module movement_names::keys_manager {
         new_supply: u64,
     }
 
+    struct TradeEvents has key, store {
+        trade_events: EventHandle<Trade>,
+    }
+
     const OCTAS: u64 = 100000000;
 
     fun init_module(admin: &signer) {
@@ -50,6 +55,10 @@ module movement_names::keys_manager {
         let object_signer = object::generate_signer(constructor_ref);
 
         object::move_to<Settings>(object_signer, settings);
+
+        move_to(admin_address, BridgeEvents {
+            trade_events: account::new_event_handle<Trade>(admin_address),
+        });
     }
     
     #[view]
@@ -82,7 +91,7 @@ module movement_names::keys_manager {
         let settings = borrow_global<Settings>(object_signer());
         let protocol_fee = price * settings.protocol_fee_percent / 1 * OCTAS;
         let application_fee = price * settings.application_fee_percent / 1 * OCTAS;
-        let subject_fee = price * config::subject_fee_percent() / 1 * OCTAS;
+        let subject_fee = price * settings.subject_fee_percent / 1 * OCTAS;
         return price + protocol_fee + application_fee + subject_fee;
     }
 
@@ -91,24 +100,94 @@ module movement_names::keys_manager {
         let price = get_sell_price(key_subject, amount);
         let protocol_fee = price * settings.protocol_fee_percent / 1 * OCTAS;
         let application_fee = price * settings.application_fee_percent / 1 * OCTAS;
-        let subject_fee = price * config::subject_fee_percent() / 1 * OCTAS;
+        let subject_fee = price * settings.subject_fee_percent / 1 * OCTAS;
         return price - protocol_fee - application_fee - subject_fee;
     }
 
-    entry fun buy_keys(subject_key: address, amount: u64) acquires NameRecord, Settings {
-        let record = borrow_global_mut<NameRecord>(subject_key);
-        // TODO: handle initial supply
+    entry fun buy_keys(account: &signer, subject: address, amount: u64, application_fee_destination: address) acquires NameRecord, Settings {
+        let record = borrow_global_mut<NameRecord>(subject);
+        let account_addr = signer::signer_addr(account);
         assert!(record.supply > 0, 1);
         let price = get_price(record.key_supply, amount);
         let settings = borrow_global<Settings>(object_signer());
         let protocol_fee = price * settings.protocol_fee_percent / 1 * OCTAS;
         let application_fee = price * settings.application_fee_percent / 1 * OCTAS;
-        let subject_fee = price * config::subject_fee_percent() / 1 * OCTAS;
+        let subject_fee = price * settings.subject_fee_percent / 1 * OCTAS;
+        
+        assert!(coin::transfer(account_addr, settings.protocol_fee_destination, protocol_fee), 2);
+        if (application_fee_destination != 0) {
+            assert!(coin::transfer(account_addr, application_fee_destination, application_fee), 3);
+        } else {
+            assert!(coin::transfer(account_addr, settings.protocol_fee_destination, application_fee), 3);
+        }
+        assert!(coin::transfer(account_addr, subject, subject_fee), 2);
+        assert!(coin::transfer(account_addr, admin_address, price - protocol_fee - application_fee - subject_fee));
+        record.key_supply = record.key_supply + amount;
+        
+        let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
+        let token_signer = object::generate_signer(&constructor_ref);
+        let mint_ref = fungible_asset::generate_mint_ref(constructor_ref);
+        fungible_asset::mint_to(&mint_ref, account_addr, amount);
 
-        // TODO: handle price
-        assert!(coin::transfer_from(sender, settings.protocol_fee_destination, protocol_fee), 2);
-        record.key_supply += amount;
+        event::emit_event(  
+            &mut trade_events.trade_events,
+            Trade {  
+                trader: account_addr,
+                domain: subject,
+                appliaction: application_fee_destination,
+                is_buy: true,
+                key_amount: amount,
+                move_amount: price,
+                protocol_amount: protocol_fee,
+                domain_amount: subject_fee,
+                application_amount: application_fee,
+                new_supply: record.key_supply,
+           }  
+       );  
+    }
 
+    entry fun sell_keys(account: &signer, subject: address, amount: u64, application_fee_destination: address) acquires NameRecord, Settings {
+        let record = borrow_global_mut<NameRecord>(subject);
+        let account_addr = signer::signer_addr(account);
+        assert!(record.supply - amount > 0, 1);
+        let price = get_price(record.key_supply - amount, amount);
+        let settings = borrow_global<Settings>(object_signer());
+        let protocol_fee = price * settings.protocol_fee_percent / 1 * OCTAS;
+        let application_fee = price * settings.application_fee_percent / 1 * OCTAS;
+        let subject_fee = price * settings.subject_fee_percent / 1 * OCTAS;
+        
+        let admin_address = settings.protocol_fee_destination;
+        assert!(coin::transfer(admin_address, settings.protocol_fee_destination, protocol_fee), 2);
+        if (application_fee_destination != 0) {
+            assert!(coin::transfer(admin_address, application_fee_destination, application_fee), 3);
+        } else {
+            assert!(coin::transfer(admin_address, settings.protocol_fee_destination, application_fee), 3);
+        }
+        assert!(coin::transfer(admin_address, subject, subject_fee), 2);
+        assert!(coin::transfer(account_addr, account_addr, price - protocol_fee - application_fee - subject_fee));
+
+        record.key_supply = record.key_supply - amount;
+        
+        let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
+        let token_signer = object::generate_signer(&constructor_ref);
+        let burn_ref = fungible_asset::generate_burn_ref(constructor_ref);
+        fungible_asset::burn(&burn_ref, account_addr, amount);
+
+        event::emit_event(  
+            &mut trade_events.trade_events,
+            Trade {  
+                trader: account_addr,
+                domain: subject,
+                appliaction: application_fee_destination,
+                is_buy: false,
+                key_amount: amount,
+                move_amount: price,
+                protocol_amount: protocol_fee,
+                domain_amount: subject_fee,
+                application_amount: application_fee,
+                new_supply: record.key_supply,
+           }  
+       );  
     }
     
 }
