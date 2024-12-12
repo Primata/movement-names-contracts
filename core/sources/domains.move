@@ -5,6 +5,7 @@ module movement_names::domains {
     use aptos_framework::coin;
     use aptos_framework::event;
     use aptos_framework::object::{Self, Object, ExtendRef, TransferRef};
+    use aptos_framework::fungible_asset::{Self, BurnRef, Metadata, MintRef};
     use aptos_framework::timestamp;
     use movement_names::config;
     use movement_names::price_model;
@@ -18,6 +19,9 @@ module movement_names::domains {
     use std::signer::address_of;
     use std::signer;
     use std::string::{Self, String, utf8};
+
+    friend movement_names::keys_manager;
+
 
     const APP_OBJECT_SEED: vector<u8> = b"MNS";
     const COLLECTION_DESCRIPTION: vector<u8> = b".move names from Movement Labs";
@@ -276,7 +280,7 @@ module movement_names::domains {
             target_address: option::none(),
             transfer_ref: object::generate_transfer_ref(&constructor_ref),
             registration_time_sec: timestamp::now_seconds(),
-            key_supply: 0,
+            key_supply: 1,
             extend_ref: object::generate_extend_ref(&constructor_ref),
         };
         move_to(&token_signer, record);
@@ -298,6 +302,14 @@ module movement_names::domains {
         object::address_to_object<Metadata>(asset_address)
     }
 
+
+    #[view]
+    public fun get_name_record(domain_name: &String) : NameRecord acquires NameRecord {
+        let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
+        let token_signer = object::generate_signer(&constructor_ref);
+        borrow_global<NameRecord>(signer::address_of(&token_signer))
+    }
+
     fun create_key(to_addr: &address, domain_name: &String) {
         let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
         let token_signer = object::generate_signer(&constructor_ref);
@@ -314,7 +326,7 @@ module movement_names::domains {
         let mint_ref = fungible_asset::generate_mint_ref(constructor_ref);
         let burn_ref = fungible_asset::generate_burn_ref(constructor_ref);
         let transfer_ref = fungible_asset::generate_transfer_ref(constructor_ref);
-        let metadata_object_keys_manager = object::generate_signer(&keys_manager);
+        let metadata_object_keys_manager = object::generate_signer(&token_signer);
 
         let admin_primary_store = primary_fungible_store::ensure_primary_store_exists(
             &token_signer,
