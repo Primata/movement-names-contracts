@@ -1,17 +1,17 @@
 module movement_names::domains {
     use aptos_framework::account;
     use aptos_framework::aptos_account;
+    use aptos_framework::primary_fungible_store;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     use aptos_framework::event;
     use aptos_framework::object::{Self, Object, ExtendRef, TransferRef};
-    use aptos_framework::fungible_asset::{Self, BurnRef, Metadata, MintRef};
+    use aptos_framework::fungible_asset::{Self, BurnRef, Metadata, MintRef, FungibleStore, TransferRef as FungibleTransferRef};
     use aptos_framework::timestamp;
     use movement_names::config;
     use movement_names::price_model;
     use movement_names::token_helper;
     use movement_names::string_validator;
-    use movement_names::keys_manager;
     use aptos_token_objects::collection;
     use aptos_token_objects::token;
     use std::error;
@@ -20,8 +20,8 @@ module movement_names::domains {
     use std::signer;
     use std::string::{Self, String, utf8};
 
-    friend movement_names::keys_manager;
-
+    // Todo: uncomment this after debugging domains.move
+    // friend movement_names::keys_manager;
 
     const APP_OBJECT_SEED: vector<u8> = b"MNS";
     const COLLECTION_DESCRIPTION: vector<u8> = b".move names from Movement Labs";
@@ -105,10 +105,14 @@ module movement_names::domains {
         extend_ref: ExtendRef,
     }
 
-    struct ManagedFungibleAsset {
+    struct ManagedFungibleAsset has key {
         mint_ref: MintRef,
-        transfer_ref: TransferRef,
+        transfer_ref: FungibleTransferRef,
         burn_ref: BurnRef,
+    }
+
+    struct State has key {
+        paused: bool,
     }
 
     #[resource_group_member(group = movement_names::domains::ObjectGroup)]
@@ -271,7 +275,7 @@ module movement_names::domains {
         );
         let token_signer = object::generate_signer(&constructor_ref);
         // Mint a key Funbile Asset
-        create_key(&to_addr, &domain_name);
+        create_key(to_addr, &domain_name);
 
         // creating subdomain
         let record = NameRecord {
@@ -298,7 +302,7 @@ module movement_names::domains {
      #[view]
     /// Return the address of the managed fungible asset that's created when this module is deployed.
     public fun get_metadata(domain: &String): Object<Metadata> {
-        let asset_address = object::create_object_address(&@domains, domain);
+        let asset_address = object::create_object_address(&@domains, seed);
         object::address_to_object<Metadata>(asset_address)
     }
 
@@ -306,18 +310,18 @@ module movement_names::domains {
     #[view]
     public fun get_name_record(domain_name: &String) : NameRecord acquires NameRecord {
         let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
-        let token_signer = object::generate_signer(&constructor_ref);
-        borrow_global<NameRecord>(signer::address_of(&token_signer))
+        let token_signer = object::generate_signer(constructor_ref);
+        *borrow_global<NameRecord>(signer::address_of(&token_signer))
     }
 
-    fun create_key(to_addr: &address, domain_name: &String) {
+    fun create_key(to_addr: address, domain_name: &String) {
         let constructor_ref = &object::create_named_object(&get_app_signer(), domain_name);
-        let token_signer = object::generate_signer(&constructor_ref);
+        let token_signer = object::generate_signer(constructor_ref);
         primary_fungible_store::create_primary_store_enabled_fungible_asset(
             constructor_ref,
             option::none(),
-            utf8(domain_name + b".key"),
-            utf8(domain_name),
+            utf8(string::bytes(domain_name) + b".key"),
+            utf8(string::bytes(domain_name)),
             0, /* Integrals only */
             utf8(b"https://movementlabs.xyz/keyIcon"),
             utf8(b"http://names.movementlabs.xyz"),
@@ -326,45 +330,23 @@ module movement_names::domains {
         let mint_ref = fungible_asset::generate_mint_ref(constructor_ref);
         let burn_ref = fungible_asset::generate_burn_ref(constructor_ref);
         let transfer_ref = fungible_asset::generate_transfer_ref(constructor_ref);
-        let metadata_object_keys_manager = object::generate_signer(&token_signer);
+        let metadata_object_keys_manager = object::generate_signer(constructor_ref);
 
         let admin_primary_store = primary_fungible_store::ensure_primary_store_exists(
-            &token_signer,
-            get_metadata(domain_name)
+            signer::address_of(&token_signer),
+            constructor_ref,
         );
-        
-        fungible_asset::mint_to(&mint_ref, to_addr, 1);
-        // Allow keys manager to mint, burn, and transfer keys
+
+        fungible_asset::mint_to<FungibleStore>(&mint_ref, admin_primary_store, 1);
+
         move_to(
             &metadata_object_keys_manager,
             ManagedFungibleAsset { mint_ref, transfer_ref, burn_ref }
-        ); // <:!:initialize
+        );
 
-        // Create a global state to pause the FA coin and move to Metadata object.
         move_to(
             &metadata_object_keys_manager,
-            State { paused: false, }
-        );
-
-        // Override the deposit and withdraw functions which mean overriding transfer.
-        // This ensures all transfer will call withdraw and deposit functions in this module
-        // and perform the necessary checks.
-        // This is OPTIONAL. It is an advanced feature and we don't NEED a global state to pause the FA coin.
-        let deposit = function_info::new_function_info(
-            admin,
-            string::utf8(domain_name),
-            string::utf8(b"deposit"),
-        );
-        let withdraw = function_info::new_function_info(
-            admin,
-            string::utf8(domain_name),
-            string::utf8(b"withdraw"),
-        );
-        dispatchable_fungible_asset::register_dispatch_functions(
-            constructor_ref,
-            option::some(withdraw),
-            option::some(deposit),
-            option::none(),
+            State { paused: false }
         );
     }
 

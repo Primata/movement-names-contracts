@@ -1,20 +1,11 @@
 module movement_names::keys_manager {
-    use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
     use aptos_framework::event;
-    use aptos_framework::object::{Self, Object, ExtendRef, TransferRef};
-    use aptos_framework::timestamp;
+    use aptos_framework::fungible_asset;
+    use aptos_framework::object::Self;
     use aptos_framework::account;
-    use movement_names::config;
-    use movement_names::price_model;
-    use movement_names::token_helper;
-    use movement_names::string_validator;
     use movement_names::domains;
-    use std::error;
-    use std::option::{Self, Option};
-    use std::signer::address_of;
     use std::signer;
-    use std::string::{Self, String, utf8};
     
     struct Settings has key {
         protocol_fee_destination : address,
@@ -63,7 +54,7 @@ module movement_names::keys_manager {
 
     #[view]
     public fun get_settings() : &Settings {
-        &borrow_global_mut<Settings>(signer::address_of(&object_signer()))
+        borrow_global<Settings>(signer::address_of(&object_signer()))
     }
     
     #[view]
@@ -75,13 +66,13 @@ module movement_names::keys_manager {
 
     #[view]
     public fun get_buy_price(domain_name: &String, amount: u64) : u64  {
-        let supply = get_name_record(domain_name).key_supply;
+        let supply = domains::get_name_record(domain_name).key_supply;
         return get_price(supply, amount)
     }
 
     #[view]
     public fun get_sell_price(domain_name: &String, amount: u64) : u64  {
-        let supply = get_name_record(domain_name).key_supply;
+        let supply = domains::get_name_record(domain_name).key_supply;
         return get_price(supply - amount, amount)
     }
 
@@ -153,7 +144,7 @@ module movement_names::keys_manager {
     }
 
     entry fun sell_keys(account: &signer, subject: address, amount: u64, application_fee_destination: address) acquires NameRecord, Settings {
-        let record = get_name_record(subject);
+        let record = domains::get_name_record(subject);
         let account_addr = signer::address_of(account);
         assert!(record.key_supply - amount > 0, 1);
         let price = get_price(record.key_supply - amount, amount);
